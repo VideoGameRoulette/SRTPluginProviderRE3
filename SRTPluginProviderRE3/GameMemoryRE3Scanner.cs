@@ -1,6 +1,4 @@
 ﻿using ProcessMemory;
-using static ProcessMemory.Extensions;
-using SRTPluginProviderRE3.Structs;
 using System;
 using System.Diagnostics;
 using SRTPluginProviderRE3.Structs.GameStructs;
@@ -59,8 +57,8 @@ namespace SRTPluginProviderRE3
             if (process == null)
                 return; // Do not continue if this is null.
 
-            GameVersion? gv = SelectPointerAddresses(GameHashes.DetectVersion(process.MainModule.FileName));
-            if (gv == null)
+            GameVersion gv = SelectPointerAddresses(GameHashes.DetectVersion(process.MainModule.FileName));
+            if (gv == GameVersion.Unknown)
                 return; // Unknown version.
 
             // int mainFlowManagerOffset = (gv == GameVersion.RE3_WW_20230425_1) ? 0x1A0 : 0x198;
@@ -79,30 +77,46 @@ namespace SRTPluginProviderRE3
             }
         }
 
-        private GameVersion? SelectPointerAddresses(GameVersion version)
+        private GameVersion SelectPointerAddresses(GameVersion version)
         {
             switch (version)
             {
-                case GameVersion.RE3_WW_20230425_1:
+                case GameVersion.RE3_WW_11026988:
                     {
                         // pAddressMainFlowManager = 0x09A70808;
+                        paEnemyManager = 0x09A750C8;
                         paGameClock = 0x09A650A8;
                         paGameRankSystem = 0x09A6E608;
-                        paPlayerManager = 0x09A772E8;
                         paInventoryManager = 0x09A68190;
-                        paEnemyManager = 0x09A750C8;
-                        return GameVersion.RE3_WW_20230425_1;
+                        paPlayerManager = 0x09A772E8;
+                        return GameVersion.RE3_WW_11026988;
                     }
-
-                case GameVersion.RE3_WW_20211217_1:
+                case GameVersion.RE3_WW_11047294:
                     {
-                        // pAddressMainFlowManager = 0x08DAFBC0;
-                        paGameClock = 0x08DB3BA0;
-                        paGameRankSystem = 0x08D816A8;
-                        paPlayerManager = 0x08D89DF0;
-                        paInventoryManager = 0x08D85BA0;
-                        paEnemyManager = 0x08D888A8;
-                        return GameVersion.RE3_WW_20211217_1;
+                        paEnemyManager = 0x08C72D60;
+                        paGameClock = 0x08C63308;
+                        paGameRankSystem = 0x08C6B358;
+                        paInventoryManager = 0x08C6F648;
+                        paPlayerManager = 0x08C73F98;
+                        return GameVersion.RE3_WW_11047294;
+                    }
+                case GameVersion.RE3_CEROD_11026646:
+                    {
+                        paEnemyManager = 0x0;
+                        paGameClock = 0x0;
+                        paGameRankSystem = 0x0;
+                        paInventoryManager = 0x0;
+                        paPlayerManager = 0x0;
+                        return GameVersion.RE3_CEROD_11026646;
+                    }
+                case GameVersion.RE3_CEROD_11047603:
+                    {
+                        paEnemyManager = 0x0;
+                        paGameClock = 0x0;
+                        paGameRankSystem = 0x0;
+                        paInventoryManager = 0x0;
+                        paPlayerManager = 0x0;
+                        return GameVersion.RE3_CEROD_11047603;
                     }
             }
 
