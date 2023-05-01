@@ -74,7 +74,7 @@ namespace SRTPluginProviderRE3
                 PointerGameClock = new MultilevelPointer(memoryAccess, (nint*)(BaseAddress + paGameClock));
                 PointerGameRankSystem = new MultilevelPointer(memoryAccess, (nint*)(BaseAddress + paGameRankSystem));
                 PointerPlayerCondition = new MultilevelPointer(memoryAccess, (nint*)(BaseAddress + paPlayerManager), 0x50, 0x10, 0x20);
-                PointerInventoryManager = new MultilevelPointer(memoryAccess, (nint*)(BaseAddress + paInventoryManager), 0x50);
+                PointerInventoryManager = new MultilevelPointer(memoryAccess, (nint*)(BaseAddress + paInventoryManager), 0x58);
                 PointerEnemyManager = new MultilevelPointer(memoryAccess, (nint*)(BaseAddress + paEnemyManager));
             }
         }
@@ -168,7 +168,7 @@ namespace SRTPluginProviderRE3
             gameMemoryValues._enemyCount = memoryAccess.GetIntAt((nuint*)IntPtr.Add(em.ActiveEnemyList, mSize));
             for (int i = 0; i < MAX_ENTITES; i++)
             {
-                if (i > gameMemoryValues.EnemyCount)
+                if (i >= gameMemoryValues.EnemyCount)
                 {
                     gameMemoryValues._enemies[i].SetValues(0, null);
                     continue;
