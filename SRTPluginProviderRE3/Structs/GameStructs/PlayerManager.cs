@@ -21,6 +21,17 @@ namespace SRTPluginProviderRE3.Structs.GameStructs
         public bool IsPoisoned { get => isPoisoned; set => isPoisoned = value; }
         public bool HasParasite { get => hasParasite; set => hasParasite = value; }
         public Vec3 Position { get => position; set => position = value; }
+        public PlayerState HealthState
+        {
+            get =>
+                !Health.IsAlive ? PlayerState.Dead :
+                !IsPoisoned ? PlayerState.Poisoned :
+                !HasParasite ? PlayerState.Gassed :
+                Health.Percentage >= 0.66f ? PlayerState.Fine :
+                Health.Percentage >= 0.33f ? PlayerState.Caution :
+                PlayerState.Danger;
+        }
+        public string CurrentHealthState => HealthState.ToString();
 
         public Player()
         {
@@ -109,6 +120,18 @@ namespace SRTPluginProviderRE3.Structs.GameStructs
         public int CurrentHP => currentHitPoint;
         public bool Invincible => invincible != 0;
         public bool NoDamage => noDamage != 0;
+        public float Percentage => CurrentHP > 0 ? (float)CurrentHP / (float)MaxHP : 0f;
+        public bool IsAlive => CurrentHP != 0 && MaxHP != 0 && CurrentHP > 0 && CurrentHP <= MaxHP;
+    }
+
+    public enum PlayerState
+    {
+        Dead,
+        Fine,
+        Caution,
+        Danger,
+        Poisoned,
+        Gassed
     }
 
     public enum SurvivorType : int

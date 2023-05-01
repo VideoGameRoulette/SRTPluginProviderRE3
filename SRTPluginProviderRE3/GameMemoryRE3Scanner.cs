@@ -121,7 +121,7 @@ namespace SRTPluginProviderRE3
             }
 
             // If we made it this far... rest in pepperonis. We have failed to detect any of the correct versions we support and have no idea what pointer addresses to use. Bail out.
-            return null;
+            return GameVersion.Unknown;
         }
 
         internal void UpdatePointers()
