@@ -133,13 +133,16 @@ namespace SRTPluginProviderRE3
             PointerEnemyManager.UpdatePointers();
         }
 
-        internal unsafe IGameMemoryRE3 Refresh()
+        private unsafe void UpdateGameClock()
         {
             // GameClock
             var gc = PointerGameClock.Deref<GameClock>(0x0);
             var gsd = memoryAccess.GetAt<GameClockGameSaveData>((nuint*)gc.GameSaveData);
             gameMemoryValues._timer.SetValues(gc, gsd);
+        }
 
+        private unsafe void UpdateGameRankSystem()
+        {
             // GameRankSystem
             var grs = PointerGameRankSystem.Deref<GameRankSystem>(0x0);
             var grpd = memoryAccess.GetAt<GameRankParameterData>((nuint*)grs.GameRankParameter);
@@ -149,13 +152,19 @@ namespace SRTPluginProviderRE3
             dpc[3] = memoryAccess.GetAt<DifficultyParamClass>((nuint*)grpd.DifficultyParamVeryHard);
             dpc[4] = memoryAccess.GetAt<DifficultyParamClass>((nuint*)grpd.DifficultyParamImpossible);
             gameMemoryValues._rankManager.SetValues(grs, dpc);
+        }
 
+        private unsafe void UpdatePlayerManager()
+        {
             // PlayerManager
             var pc = PointerPlayerCondition.Deref<PlayerCondition>(0x0);
             var cc = memoryAccess.GetAt<CostumeChanger>((nuint*)pc.CostumeChanger);
             var hpc = memoryAccess.GetAt<HitPointController>((nuint*)pc.HitPointController);
             gameMemoryValues._playerManager.SetValues(pc, cc, hpc);
+        }
 
+        private unsafe void UpdateInventoryManager()
+        {
             // InventoryManager
             var im = PointerInventoryManager.Deref<InventoryManager>(0x0);
             var invArray = memoryAccess.GetAt<ListInventory>((nuint*)im.Inventory);
@@ -170,36 +179,44 @@ namespace SRTPluginProviderRE3
                 var slotAddress = (long*)memoryAccess.GetLongAt((nuint*)IntPtr.Add(slots._Slots, position));
                 var slot = memoryAccess.GetAt<Slot>(slotAddress);
                 var itemAddress = (long*)memoryAccess.GetLongAt((nuint*)IntPtr.Add(slot._Slot, 0x10));
+                var slotId = memoryAccess.GetIntAt((nuint*)IntPtr.Add(slot._Slot, 0x28));
                 var item = memoryAccess.GetAt<PrimitiveItem>(itemAddress);
-                gameMemoryValues._items[i].SetValues(slot.Index, item);
+                gameMemoryValues._items[i].SetValues(slotId, item);
             }
+        }
 
+        private unsafe void UpdateEnemyManager()
+        {
             // EnemyManager
             var em = PointerEnemyManager.Deref<EnemyManager>(0x0);
             gameMemoryValues._enemyKillCount = em.TotalEnemyKillCount;
-            var el = memoryAccess.GetLongAt((nuint*)IntPtr.Add(em.EnemyList, 0x10));
             var ael = memoryAccess.GetLongAt((nuint*)IntPtr.Add(em.ActiveEnemyList, 0x10));
             gameMemoryValues._enemyCount = memoryAccess.GetIntAt((nuint*)IntPtr.Add(em.ActiveEnemyList, mSize));
+
             for (int i = 0; i < MAX_ENTITES; i++)
             {
                 if (i >= gameMemoryValues.EnemyCount)
                 {
-                    gameMemoryValues._enemies[i].SetValues(0, null);
+                    gameMemoryValues._enemies[i].SetValues(-1, null);
                     continue;
                 }
                 var position = (i * 0x8) + 0x20;
-                // EnemyList
-                var eAddress = memoryAccess.GetLongAt((nuint*)IntPtr.Add((IntPtr)el, position));
-                var ec1 = memoryAccess.GetLongAt((nuint*)IntPtr.Add((IntPtr)eAddress, 0x18));
-                var ecc1 = memoryAccess.GetLongAt((nuint*)IntPtr.Add((IntPtr)ec1, 0x20));
-                var enemyType = memoryAccess.GetIntAt((nuint*)IntPtr.Add((IntPtr)ecc1, 0x54));
-                // ActiveEnemyList
-                var aeAddress = memoryAccess.GetLongAt((nuint*)IntPtr.Add((IntPtr)ael, position));
-                var hc = (long*)memoryAccess.GetLongAt((nuint*)IntPtr.Add((IntPtr)aeAddress, 0x300));
+                var ec = memoryAccess.GetLongAt((nuint*)IntPtr.Add((IntPtr)ael, position));
+                var ecc = memoryAccess.GetLongAt((nuint*)IntPtr.Add((IntPtr)ec, 0x170));
+                var id = memoryAccess.GetIntAt((nuint*)IntPtr.Add((IntPtr)ecc, 0x54));
+                var hc = (long*)memoryAccess.GetLongAt((nuint*)IntPtr.Add((IntPtr)ec, 0x300));
                 var enemyHP = memoryAccess.GetAt<HitPointController>(hc);
-                gameMemoryValues._enemies[i].SetValues(enemyType, enemyHP);
+                gameMemoryValues._enemies[i].SetValues(id, enemyHP);
             }
+        }
 
+        internal unsafe IGameMemoryRE3 Refresh()
+        {
+            UpdateGameClock();
+            UpdateGameRankSystem();
+            UpdatePlayerManager();
+            UpdateInventoryManager();
+            UpdateEnemyManager();
             HasScanned = true;
             return gameMemoryValues;
         }

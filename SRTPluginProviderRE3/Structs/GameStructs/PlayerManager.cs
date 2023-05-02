@@ -25,8 +25,8 @@ namespace SRTPluginProviderRE3.Structs.GameStructs
         {
             get =>
                 !Health.IsAlive ? PlayerState.Dead :
-                !IsPoisoned ? PlayerState.Poisoned :
-                !HasParasite ? PlayerState.Gassed :
+                IsPoisoned ? PlayerState.Poisoned :
+                HasParasite ? PlayerState.Gassed :
                 Health.Percentage >= 0.66f ? PlayerState.Fine :
                 Health.Percentage >= 0.33f ? PlayerState.Caution :
                 PlayerState.Danger;

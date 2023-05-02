@@ -91,9 +91,7 @@ namespace SRTPluginProviderRE3.Structs.GameStructs
     public struct Slot
     {
         [FieldOffset(0x18)] private nint slot;
-        [FieldOffset(0x28)] private int index;
         public IntPtr _Slot => IntPtr.Add(slot, 0x0);
-        public int Index => index;
     }
 
     [StructLayout(LayoutKind.Explicit, Pack = 1, Size = 0x24)]
