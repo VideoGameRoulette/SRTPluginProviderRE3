@@ -24,6 +24,8 @@ namespace SRTPluginProviderRE3
         private int paPlayerManager;
         private int paInventoryManager;
         private int paEnemyManager;
+        private int paLocationId;
+        private int paMapId;
 
         // Pointer Classes
         private IntPtr BaseAddress { get; set; }
@@ -32,6 +34,8 @@ namespace SRTPluginProviderRE3
         private MultilevelPointer PointerPlayerCondition { get; set; }
         private MultilevelPointer PointerInventoryManager { get; set; }
         private MultilevelPointer PointerEnemyManager { get; set; }
+        private MultilevelPointer PointerLocationId { get; set; }
+        private MultilevelPointer PointerMapId { get; set; }
 
         private DifficultyParamClass[] dpc;
 
@@ -74,6 +78,8 @@ namespace SRTPluginProviderRE3
                 PointerPlayerCondition = new MultilevelPointer(memoryAccess, (nint*)(BaseAddress + paPlayerManager), 0x50, 0x10, 0x20);
                 PointerInventoryManager = new MultilevelPointer(memoryAccess, (nint*)(BaseAddress + paInventoryManager), 0x58);
                 PointerEnemyManager = new MultilevelPointer(memoryAccess, (nint*)(BaseAddress + paEnemyManager));
+                PointerLocationId = new MultilevelPointer(memoryAccess, (nint*)(BaseAddress + paLocationId));
+                PointerMapId = new MultilevelPointer(memoryAccess, (nint*)(BaseAddress + paMapId));
             }
         }
 
@@ -89,6 +95,8 @@ namespace SRTPluginProviderRE3
                         paGameRankSystem = 0x09A6E608;
                         paInventoryManager = 0x09A68190;
                         paPlayerManager = 0x09A772E8;
+                        paLocationId = 0x09A76450;
+                        paMapId = 0x09A76458;
                         return GameVersion.RE3_WW_11026988;
                     }
                 case GameVersion.RE3_WW_11047294:
@@ -98,6 +106,8 @@ namespace SRTPluginProviderRE3
                         paGameRankSystem = 0x08C6B358;
                         paInventoryManager = 0x08C6F648;
                         paPlayerManager = 0x08C73F98;
+                        paLocationId = 0x08C74300;
+                        paMapId = 0x08C74308;
                         return GameVersion.RE3_WW_11047294;
                     }
                 case GameVersion.RE3_CEROD_11026646:
@@ -107,6 +117,8 @@ namespace SRTPluginProviderRE3
                         paGameRankSystem = 0x0;
                         paInventoryManager = 0x0;
                         paPlayerManager = 0x0;
+                        paLocationId = 0x0;
+                        paMapId = 0x0;
                         return GameVersion.RE3_CEROD_11026646;
                     }
                 case GameVersion.RE3_CEROD_11047603:
@@ -116,6 +128,8 @@ namespace SRTPluginProviderRE3
                         paGameRankSystem = 0x0;
                         paInventoryManager = 0x0;
                         paPlayerManager = 0x0;
+                        paLocationId = 0x0;
+                        paMapId = 0x0;
                         return GameVersion.RE3_CEROD_11047603;
                     }
             }
@@ -131,6 +145,8 @@ namespace SRTPluginProviderRE3
             PointerPlayerCondition.UpdatePointers();
             PointerInventoryManager.UpdatePointers();
             PointerEnemyManager.UpdatePointers();
+            PointerLocationId.UpdatePointers();
+            PointerMapId.UpdatePointers();
         }
 
         private unsafe void UpdateGameClock()
@@ -210,6 +226,15 @@ namespace SRTPluginProviderRE3
             }
         }
 
+        private unsafe void UpdateLocation()
+        {
+            gameMemoryValues._locationID = memoryAccess.GetIntAt(PointerLocationId.BaseAddress);
+            gameMemoryValues._locationName = ((LocationID)gameMemoryValues._locationID).ToString();
+
+            gameMemoryValues._mapID = memoryAccess.GetIntAt(PointerMapId.BaseAddress);
+            gameMemoryValues._mapName = ((MapID)gameMemoryValues._mapID).ToString();
+        }
+
         internal unsafe IGameMemoryRE3 Refresh()
         {
             UpdateGameClock();
@@ -217,6 +242,7 @@ namespace SRTPluginProviderRE3
             UpdatePlayerManager();
             UpdateInventoryManager();
             UpdateEnemyManager();
+            UpdateLocation();
             HasScanned = true;
             return gameMemoryValues;
         }

@@ -37,6 +37,7 @@ namespace SRTPluginProviderRE3.Structs.GameStructs
         public int Count { get => count; set => count = value; }
         public bool IsItem => ItemId != ItemID.None && WeaponId == WeaponType.None;
         public bool IsWeapon => ItemId == ItemID.None && WeaponId != WeaponType.None;
+        public bool IsEmptySlot => !IsItem && !IsWeapon;
         public string ItemName => ItemId.ToString();
         public string WeaponName => WeaponId.ToString();
         public string WeaponPartFlags => WeaponParts.ToString();
@@ -218,9 +219,9 @@ namespace SRTPluginProviderRE3.Structs.GameStructs
     public enum WeaponParts : int
     {
         None = 0,
-        A = 1,
-        B = 2,
-        C = 4,
+        First = 1,
+        Second = 2,
+        Third = 4,
         FullCustom = 7,
     }
 }
