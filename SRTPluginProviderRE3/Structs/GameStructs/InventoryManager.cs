@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
-using System.Numerics;
 using System.Runtime.InteropServices;
 
 namespace SRTPluginProviderRE3.Structs.GameStructs
@@ -14,6 +14,9 @@ namespace SRTPluginProviderRE3.Structs.GameStructs
         private WeaponParts weaponParts;
         private ItemID bulletId;
         private int count;
+        private bool isForceBlank;
+        private int lastWeaponType;
+        private bool infinity;
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public string _DebuggerDisplay
@@ -41,9 +44,27 @@ namespace SRTPluginProviderRE3.Structs.GameStructs
         public string ItemName => ItemId.ToString();
         public string WeaponName => WeaponId.ToString();
         public string WeaponPartFlags => WeaponParts.ToString();
+        public string ItemDebug => IsItem ? ItemName : WeaponName + GetFlagsString(WeaponParts);
+        public bool IsFatSlot { get => Utils.Slot2Items.Contains(ItemDebug); }
         public string BulletName => BulletId.ToString();
+        public bool IsForceBlank { get => isForceBlank; set => isForceBlank = value; }
+        public int LastWeaponType { get => lastWeaponType; set => lastWeaponType = value; }
+        public bool Infinity { get => infinity; set => infinity = value; }
 
-        public void SetValues(int index, PrimitiveItem item)
+        private string GetFlagsString(WeaponParts _weaponParts)
+        {
+            List<string> includedParts = new List<string>();
+            if (_weaponParts.HasFlag(WeaponParts.First))
+                includedParts.Add(nameof(WeaponParts.First));
+            if (_weaponParts.HasFlag(WeaponParts.Second))
+                includedParts.Add(nameof(WeaponParts.Second));
+            if (_weaponParts.HasFlag(WeaponParts.Third))
+                includedParts.Add(nameof(WeaponParts.Third));
+            string result = string.Join("_", includedParts);
+            return result;
+        }
+
+        public void SetValues(int index, PrimitiveItem item, Slot slot)
         {
             SlotNo = index;
             ItemId = item.ItemId;
@@ -51,7 +72,38 @@ namespace SRTPluginProviderRE3.Structs.GameStructs
             WeaponParts = item.WeaponParts;
             BulletId = item.BulletId;
             Count = item.Count;
+            IsForceBlank = slot.IsForceBlank;
+            LastWeaponType = slot.LastWeaponType;
+            Infinity = slot.Infinity;
         }
+    }
+
+    public class Utils
+    {
+        public static List<string> Slot2Items = new List<string>()
+        {
+            "BatteryPack",
+            "CQBRAssaultRifle",
+            "CQBRAssaultRifleFirst",
+            "CQBRAssaultRifleSecond",
+            "CQBRAssaultRifleFirst_Second",
+            "CQBRAssaultRifleThird",
+            "CQBRAssaultRifleFirst_Third",
+            "CQBRAssaultRifleSecond_Third",
+            "CQBRAssaultRifleFirst_Second_Third",
+            "G19HandgunFirst",
+            "G19HandgunFirst_Second",
+            "G19HandgunFirst_Third",
+            "G19HandgunFirst_Second_Third",
+            "InfiniteCQBRAssaultRifle",
+            "M3ShotgunFirst",
+            "M3ShotgunFirst_Second",
+            "M3ShotgunFirst_Third",
+            "M3ShotgunFirst_Second_Third",
+            "MGLGrenadeLauncher",
+            "RAIDEN",
+            "RocketLauncher",
+        };
     }
 
     [StructLayout(LayoutKind.Explicit, Pack = 1, Size = 0x20)]
@@ -60,6 +112,15 @@ namespace SRTPluginProviderRE3.Structs.GameStructs
         [FieldOffset(0x10)] private nint inventory;
         [FieldOffset(0x18)] private int mSize;
         public IntPtr Inventory => IntPtr.Add(inventory, 0x0);
+        public int Count => mSize;
+    }
+
+    [StructLayout(LayoutKind.Explicit, Pack = 1, Size = 0x20)]
+    public struct ShortcutManager
+    {
+        [FieldOffset(0x18)] private nint entries;
+        [FieldOffset(0x20)] private int mSize;
+        public IntPtr Entries => IntPtr.Add(entries, 0x0);
         public int Count => mSize;
     }
 
@@ -91,8 +152,14 @@ namespace SRTPluginProviderRE3.Structs.GameStructs
     [StructLayout(LayoutKind.Explicit, Pack = 1, Size = 0x28)]
     public struct Slot
     {
+        [FieldOffset(0x10)] private byte isForceBlank;
         [FieldOffset(0x18)] private nint slot;
+        [FieldOffset(0x10)] private int lastWeaponType;
+        [FieldOffset(0x10)] private byte infinity;
+        public bool IsForceBlank => isForceBlank != 0;
         public IntPtr _Slot => IntPtr.Add(slot, 0x0);
+        public int LastWeaponType => lastWeaponType;
+        public bool Infinity => infinity != 0;
     }
 
     [StructLayout(LayoutKind.Explicit, Pack = 1, Size = 0x24)]
@@ -110,6 +177,14 @@ namespace SRTPluginProviderRE3.Structs.GameStructs
         public ItemID BulletId => (ItemID)bulletId;
         public int Count => count;
     }
+
+    public enum Shortcut : int
+    {
+        Up = 0,
+        Down = 1,
+        Left = 2,
+        Right = 3,
+    };
 
     public enum ItemID : int
     {
@@ -196,23 +271,24 @@ namespace SRTPluginProviderRE3.Structs.GameStructs
     public enum WeaponType : int
     {
         None = -1,
-        G19_Handgun = 0x01,
-        G18_Burst_Handgun = 0x02,
-        G18_Handgun = 0x03,
-        Samurai_Edge = 0x04,
-        Infinite_MUP_Handgun = 0x07,
-        Shotgun = 0x0B,
-        CQBR_Assault_Rifle = 0x15,
-        Infinite_CQBR_Assault_Rifle = 0x16,
-        Lightning_Hawk = 0x1F,
+        BareHand = 0,
+        G19Handgun = 0x01,
+        G18BurstHandgun = 0x02,
+        G18Handgun = 0x03,
+        SamuraiEdge = 0x04,
+        InfiniteMUPHandgun = 0x07,
+        M3Shotgun = 0x0B,
+        CQBRAssaultRifle = 0x15,
+        InfiniteCQBRAssaultRifle = 0x16,
+        LightningHawk = 0x1F,
         RAIDEN = 0x20,
-        Grenade_Launcher = 0x2A,
-        Combat_Knife_Carlos = 0x2E,
-        Survival_Knife_Jill = 0x2F,
-        HOT_DOGGER = 0x30,
-        Infinite_Rocket_Launcher = 0x31,
-        Hand_Grenade = 0x41,
-        Flash_Grenade = 0x42,
+        MGLGrenadeLauncher = 0x2A,
+        CombatKnife = 0x2E,
+        SurvivalKnife = 0x2F,
+        HotDogger = 0x30,
+        RocketLauncher = 0x31,
+        HandGrenade = 0x41,
+        FlashGrenade = 0x42,
     }
 
     [Flags]

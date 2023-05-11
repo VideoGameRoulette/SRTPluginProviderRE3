@@ -31,6 +31,11 @@ namespace SRTPluginProviderRE3
         public InventoryEntry[] Items { get => _items; set => _items = value; }
         internal InventoryEntry[] _items;
 
+        public int ShortcutCount { get => _shortcutCount; set => _shortcutCount = value; }
+        internal int _shortcutCount;
+        public InventoryEntry[] Shortcuts { get => _shortcuts; set => _shortcuts = value; }
+        internal InventoryEntry[] _shortcuts;
+
         public int EnemyCount { get => _enemyCount; set => _enemyCount = value; }
         internal int _enemyCount;
 

@@ -19,6 +19,8 @@ namespace SRTPluginProviderRE3
         int InventoryCount { get; }
 
         InventoryEntry[] Items { get; }
+        int ShortcutCount { get; }
+        InventoryEntry[] Shortcuts { get; }
 
         int EnemyCount { get; }
 

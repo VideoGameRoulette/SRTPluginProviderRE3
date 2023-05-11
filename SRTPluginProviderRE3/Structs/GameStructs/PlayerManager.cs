@@ -20,7 +20,7 @@ namespace SRTPluginProviderRE3.Structs.GameStructs
         public HitPointController Health { get => hitPointController; set => hitPointController = value; }
         public bool IsPoisoned { get => isPoisoned; set => isPoisoned = value; }
         public bool HasParasite { get => hasParasite; set => hasParasite = value; }
-        public bool IsLoaded => (int)CurrentSurvivor != 32759 || Health.MaxHP != 0;
+        public bool IsLoaded => (int)CurrentSurvivor <= (int)SurvivorType.PROTECTIVECLOTH;
         public Vec3 Position { get => position; set => position = value; }
         public PlayerState HealthState
         {

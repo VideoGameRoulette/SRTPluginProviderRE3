@@ -9,6 +9,7 @@ namespace SRTPluginProviderRE3
     {
         private readonly int MAX_ENTITES = 32;
         private readonly int MAX_ITEMS = 20;
+        private readonly int MAX_SHORTCUTS = 4;
         private readonly int mSize = 0x18;
 
         // Variables
@@ -33,6 +34,7 @@ namespace SRTPluginProviderRE3
         private MultilevelPointer PointerGameRankSystem { get; set; }
         private MultilevelPointer PointerPlayerCondition { get; set; }
         private MultilevelPointer PointerInventoryManager { get; set; }
+        private MultilevelPointer PointerShortcutManager { get; set; }
         private MultilevelPointer PointerEnemyManager { get; set; }
         private MultilevelPointer PointerLocationId { get; set; }
         private MultilevelPointer PointerMapId { get; set; }
@@ -53,6 +55,7 @@ namespace SRTPluginProviderRE3
             gameMemoryValues._rankManager = new RankManager();
             gameMemoryValues._playerManager = new Player();
             gameMemoryValues._items = new InventoryEntry[MAX_ITEMS];
+            gameMemoryValues._shortcuts = new InventoryEntry[MAX_SHORTCUTS];
             gameMemoryValues._enemies = new Enemy[MAX_ENTITES];
         }
 
@@ -77,6 +80,7 @@ namespace SRTPluginProviderRE3
                 PointerGameRankSystem = new MultilevelPointer(memoryAccess, (nint*)(BaseAddress + paGameRankSystem));
                 PointerPlayerCondition = new MultilevelPointer(memoryAccess, (nint*)(BaseAddress + paPlayerManager), 0x50, 0x10, 0x20);
                 PointerInventoryManager = new MultilevelPointer(memoryAccess, (nint*)(BaseAddress + paInventoryManager), 0x58);
+                PointerShortcutManager = new MultilevelPointer(memoryAccess, (nint*)(BaseAddress + paInventoryManager), 0x50, 0xB8);
                 PointerEnemyManager = new MultilevelPointer(memoryAccess, (nint*)(BaseAddress + paEnemyManager));
                 PointerLocationId = new MultilevelPointer(memoryAccess, (nint*)(BaseAddress + paLocationId));
                 PointerMapId = new MultilevelPointer(memoryAccess, (nint*)(BaseAddress + paMapId));
@@ -144,6 +148,7 @@ namespace SRTPluginProviderRE3
             PointerGameRankSystem.UpdatePointers();
             PointerPlayerCondition.UpdatePointers();
             PointerInventoryManager.UpdatePointers();
+            PointerShortcutManager.UpdatePointers();
             PointerEnemyManager.UpdatePointers();
             PointerLocationId.UpdatePointers();
             PointerMapId.UpdatePointers();
@@ -197,8 +202,27 @@ namespace SRTPluginProviderRE3
                 var itemAddress = (long*)memoryAccess.GetLongAt((nuint*)IntPtr.Add(slot._Slot, 0x10));
                 var slotId = memoryAccess.GetIntAt((nuint*)IntPtr.Add(slot._Slot, 0x28));
                 var item = memoryAccess.GetAt<PrimitiveItem>(itemAddress);
-                gameMemoryValues._items[i].SetValues(slotId, item);
+                gameMemoryValues._items[i].SetValues(slotId, item, slot);
             }
+        }
+
+        private unsafe void UpdateShortcutManager()
+        {
+            // InventoryManager
+            var sm = PointerShortcutManager.Deref<ShortcutManager>(0x0);
+            var smArray = (long*)memoryAccess.GetLongAt((nuint*)sm.Entries);
+            Console.WriteLine($"slotAddress: {String.Format(((IntPtr)smArray).ToString("X8"))}");
+
+            // for (int i = 0; i < MAX_SHORTCUTS; i++)
+            // {
+            //     var position = (i * 0x18) + 0x30;
+            //     var slotAddress = memoryAccess.GetLongAt((nuint*)IntPtr.Add(smArray, position));
+            //     // var slot = memoryAccess.GetAt<Slot>(slotAddress);
+            //     // var itemAddress = (long*)memoryAccess.GetLongAt((nuint*)IntPtr.Add(slot._Slot, 0x10));
+            //     // var slotId = memoryAccess.GetIntAt((nuint*)IntPtr.Add(slot._Slot, 0x28));
+            //     // var item = memoryAccess.GetAt<PrimitiveItem>(itemAddress);
+            //     // gameMemoryValues._shortcuts[i].SetValues(slotId, item, slot);
+            // }
         }
 
         private unsafe void UpdateEnemyManager()
@@ -241,6 +265,7 @@ namespace SRTPluginProviderRE3
             UpdateGameRankSystem();
             UpdatePlayerManager();
             UpdateInventoryManager();
+            UpdateShortcutManager();
             UpdateEnemyManager();
             UpdateLocation();
             HasScanned = true;
