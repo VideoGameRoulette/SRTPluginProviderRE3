@@ -9,8 +9,8 @@ namespace SRTPluginProviderRE3.Structs.GameStructs
     public struct InventoryEntry
     {
         private int slotNo;
-        private ItemID itemId;
-        private WeaponType weaponId;
+        private ItemID itemId = ItemID.None;
+        private WeaponType weaponId = WeaponType.None;
         private WeaponParts weaponParts;
         private ItemID bulletId;
         private int count;
@@ -31,7 +31,6 @@ namespace SRTPluginProviderRE3.Structs.GameStructs
                     return string.Format("Empty Slot");
             }
         }
-
         public int SlotNo { get => slotNo; set => slotNo = value; }
         public ItemID ItemId { get => itemId; set => itemId = value; }
         public WeaponType WeaponId { get => weaponId; set => weaponId = value; }
@@ -39,7 +38,7 @@ namespace SRTPluginProviderRE3.Structs.GameStructs
         public ItemID BulletId { get => bulletId; set => bulletId = value; }
         public int Count { get => count; set => count = value; }
         public bool IsItem => ItemId != ItemID.None && WeaponId == WeaponType.None;
-        public bool IsWeapon => ItemId == ItemID.None && WeaponId != WeaponType.None;
+        public bool IsWeapon => ItemId == ItemID.None && WeaponId != WeaponType.None && WeaponId != WeaponType.BareHand;
         public bool IsEmptySlot => !IsItem && !IsWeapon;
         public string ItemName => ItemId.ToString();
         public string WeaponName => WeaponId.ToString();
@@ -82,7 +81,7 @@ namespace SRTPluginProviderRE3.Structs.GameStructs
     {
         public static List<string> Slot2Items = new List<string>()
         {
-            "BatteryPack",
+            "Battery_Pack",
             "CQBRAssaultRifle",
             "CQBRAssaultRifleFirst",
             "CQBRAssaultRifleSecond",
@@ -131,7 +130,7 @@ namespace SRTPluginProviderRE3.Structs.GameStructs
         public IntPtr _ListInventory => IntPtr.Add(listInventory, 0x0);
     }
 
-    [StructLayout(LayoutKind.Explicit, Pack = 1, Size = 0x20)]
+    [StructLayout(LayoutKind.Explicit, Pack = 1, Size = 0xD0)]
     public struct Inventory
     {
         [FieldOffset(0x90)] private int currentSlotSize;

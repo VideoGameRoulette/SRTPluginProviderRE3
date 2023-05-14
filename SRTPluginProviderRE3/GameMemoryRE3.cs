@@ -33,8 +33,21 @@ namespace SRTPluginProviderRE3
 
         public int ShortcutCount { get => _shortcutCount; set => _shortcutCount = value; }
         internal int _shortcutCount;
+
         public InventoryEntry[] Shortcuts { get => _shortcuts; set => _shortcuts = value; }
         internal InventoryEntry[] _shortcuts;
+
+        public int SubShortcutCount { get => _subShortcutCount; set => _subShortcutCount = value; }
+        internal int _subShortcutCount;
+
+        public InventoryEntry[] SubShortcuts { get => _subShortcuts; set => _subShortcuts = value; }
+        internal InventoryEntry[] _subShortcuts;
+
+        public PrimitiveItem MainSlot { get => _mainSlot; set => _mainSlot = value; }
+        internal PrimitiveItem _mainSlot;
+
+        public PrimitiveItem SubSlot { get => _subSlot; set => _subSlot = value; }
+        internal PrimitiveItem _subSlot;
 
         public int EnemyCount { get => _enemyCount; set => _enemyCount = value; }
         internal int _enemyCount;
