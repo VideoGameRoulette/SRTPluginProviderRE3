@@ -9,8 +9,8 @@ namespace SRTPluginProviderRE3.Structs.GameStructs
     public struct InventoryEntry
     {
         private int slotNo;
-        private ItemID itemId = ItemID.None;
-        private WeaponType weaponId = WeaponType.None;
+        private ItemID itemId;
+        private WeaponType weaponId;
         private WeaponParts weaponParts;
         private ItemID bulletId;
         private int count;
